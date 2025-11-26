@@ -8,7 +8,7 @@ def player(prev_play, opponent_history=[], play_order={}):
     
     # 2. Set the pattern length (n). 
     # n=5 means we look at the last 5 moves to predict the 6th.
-    n = 5
+    n = 6
     
     # 3. Learn from history 
     if len(opponent_history) > n:
