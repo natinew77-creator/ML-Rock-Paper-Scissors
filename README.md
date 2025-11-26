@@ -5,7 +5,7 @@
 ### 🚀 Launch Live VS Code Environment
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/natinew77-creator/ML-Rock-Paper-Scissors)
-> **Note:** Click the "Run on Replit" button above.
+> **Note:** Click the button above.
 
 
 
@@ -31,4 +31,4 @@ My AI successfully defeated all four bots with the following win rates:
 
 ## Technologies
 * **Python**
-* **Replit** (for testing and execution)
+* **GitHub** 
