@@ -2,8 +2,9 @@
 
 ## 🔗 Live Demonstration
 
-[![Run on Replit](https://replit.com/badge/v2/dark?slug=ml-rock-paper-scissors--natinew77)](https://replit.com/@natinew77/ML-Rock-Paper-Scissors)
+### 🚀 Launch Live VS Code Environment
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/natinew77-creator/ML-Rock-Paper-Scissors)
 > **Note:** Click the "Run on Replit" button above.
 
 
