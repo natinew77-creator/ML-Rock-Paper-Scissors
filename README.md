@@ -93,7 +93,4 @@ ML-Rock-Paper-Scissors/
 </a>
 
 ---
-*Developed by Natneal B.*
-<a href="https://linkedin.com/in/natneal-belete">
-  <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
-</a>
+*Developed by Natneal B.* &nbsp; <a href="https://linkedin.com/in/natneal-belete"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
