@@ -1,51 +1,88 @@
-# Rock Paper Scissors AI
+# 🤖 Adaptive Rock Paper Scissors AI
 
-## Live Demonstration
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Pattern%20Recognition-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
 
-### Launch Live VS Code Environment
+A high-performance AI agent designed to defeat multiple distinct bot strategies in the classic game of Rock Paper Scissors. This project demonstrates the application of **ensemble methods**, **pattern recognition**, and **adaptive strategy selection** to achieve a win rate exceeding 60% against four unique opponent archetypes.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/natinew77-creator/ML-Rock-Paper-Scissors)
-> **Note:** Click the button above.
+## 📋 Project Overview
 
+This solution was developed for the freeCodeCamp Machine Learning certification. The core challenge involves creating a single agent capable of adapting to four different opponents:
+1.  **Quincy**: A fixed-pattern bot.
+2.  **Abbey**: A frequency-analysis bot (Markov Chain-like).
+3.  **Kris**: A reactive counter-strategy bot.
+4.  **Mrugesh**: A statistical lookback bot.
 
+My solution implements a **Meta-Strategy Ensemble** that tracks the performance of multiple sub-strategies in real-time and dynamically switches to the most effective one for each opponent.
 
-## Project Overview
-This project is a Machine Learning solution for the **Rock Paper Scissors** challenge from freeCodeCamp. The goal was to create an AI player that can consistently beat four different bots (Quincy, Abbey, Kris, and Mrugesh) with a **win rate of at least 60%**.
+## 🧠 Technical Architecture
 
-## Strategy & Algorithm
-The solution uses a **Multi-Strategy Selector** that dynamically adapts to the opponent. Instead of a single algorithm, the bot tracks four different strategies simultaneously and selects the best one based on recent performance.
+The agent does not rely on a single algorithm. Instead, it employs a **Multi-Arm Bandit** approach where four distinct predictors run in parallel. A scoring system evaluates which predictor would have won the *previous* round and selects the highest-scoring predictor for the *next* move.
 
-*   **Strategy 1 (Quincy Counter):** Exploits Quincy's fixed 5-move pattern.
-*   **Strategy 2 (Abbey Counter):** Simulates Abbey's logic (which tracks my history) to predict her next move, then counters it.
-*   **Strategy 3 (Kris Counter):** Predicts Kris will play the counter to my last move.
-*   **Strategy 4 (Mrugesh Counter):** Predicts Mrugesh will play the counter to my most frequent move in the last 10 rounds.
-*   **Dynamic Selection:** The bot calculates which strategy would have won the *last* round and switches to the most successful one for the next move.
+### Sub-Strategies Implemented
 
-## Final Results
-My AI successfully defeated all four bots with significantly improved win rates:
-
-| Opponent | Win Rate | Result |
+| Strategy Name | Target Opponent | Technical Mechanism |
 | :--- | :--- | :--- |
-| **Quincy** | **100.0%** | Passed |
-| **Abbey** | **87.5%** |  Passed |
-| **Kris** | **100.0%** |  Passed |
-| **Mrugesh** | **99.7%** |  Passed |
+| **Pattern Matcher** | Quincy | **Cyclic Pattern Recognition**: Detects and exploits the fixed 5-move repetition cycle `[R, R, P, P, S]`. |
+| **Predictive Modeling** | Abbey | **2nd-Order Markov Chain Simulation**: Simulates the opponent's own logic (which tracks my history) to predict their next move, then counters it. |
+| **Reactive Counter** | Kris | **Last-Move Counter**: Exploits opponents that simply counter the player's previous move. |
+| **Statistical Lookback** | Mrugesh | **Frequency Analysis**: Analyzes the distribution of the player's last 10 moves to predict the opponent's statistical counter. |
 
-## Live Code Testing
+### Adaptive Selection Logic
+The `player` function maintains a `strategy_scores` vector. After every round:
+1.  The agent retrospectively calculates which of the 4 strategies would have defeated the opponent's last move.
+2.  Successful strategies receive a score increment.
+3.  The agent selects the strategy with the highest current score to determine the next move.
+4.  This allows the agent to "learn" the opponent's identity within the first few rounds and lock into the optimal counter-strategy.
 
-### Run Automated Tests
-To verify the win rates against all 4 bots, run the main script:
+## 🚀 Performance Results
+
+The agent was tested against 1000 rounds for each opponent. A win rate of >60% is required to pass.
+
+| Opponent | Win Rate | Status |
+| :--- | :--- | :--- |
+| **Quincy** | **100.0%** | ✅ PASSED |
+| **Abbey** | **87.5%** | ✅ PASSED |
+| **Kris** | **100.0%** | ✅ PASSED |
+| **Mrugesh** | **99.7%** | ✅ PASSED |
+
+## 💻 Installation & Usage
+
+### Prerequisites
+- Python 3.8 or higher
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/natinew77-creator/ML-Rock-Paper-Scissors.git
+cd ML-Rock-Paper-Scissors
+```
+
+### 2. Run the Simulation
+Execute the main script to play against all 4 bots and verify win rates:
 ```bash
 python3 main.py
 ```
 
-### Play Interactively
-To play against the bots yourself or test specific scenarios, you can modify `main.py` to uncomment the interactive mode:
+### 3. Interactive Mode
+To play against the bots yourself, uncomment the following line in `main.py`:
 ```python
-# In main.py, uncomment:
 # play(human, abbey, 20, verbose=True)
 ```
 
-## Technologies
-* **Python**
-* **GitHub** 
+## 📂 File Structure
+
+```
+ML-Rock-Paper-Scissors/
+├── RPS.py           # Core AI logic (Player function & strategies)
+├── main.py          # Entry point & testing orchestration
+├── RPS_game.py      # Game engine & opponent bot definitions
+├── test_module.py   # Unit tests for verification
+└── README.md        # Project documentation
+```
+
+## 🔗 Live Demo
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/natinew77-creator/ML-Rock-Paper-Scissors)
+
+---
+*Developed by [Your Name] - [Link to Portfolio/LinkedIn]*
