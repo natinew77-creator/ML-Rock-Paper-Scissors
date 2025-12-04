@@ -93,4 +93,4 @@ ML-Rock-Paper-Scissors/
 </a>
 
 ---
-*Developed by [Your Name] - [Link to Portfolio/LinkedIn]*
+*Developed by [Natneal B.] - [https://linkedin.com/in/natneal-belete]*
