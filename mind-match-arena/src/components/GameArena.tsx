@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MindMatchAI, type Move } from '../game-logic';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Brain, Activity, Terminal, User, Bot } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Brain, Activity, Terminal, User, Bot, RotateCcw, Trophy, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ai = new MindMatchAI();
+
+type GameStatus = 'SETUP' | 'PLAYING' | 'FINISHED';
 
 interface GameState {
     playerMove: Move | null;
@@ -19,6 +21,9 @@ interface GameState {
         total: number;
     };
     activeStrategy: string;
+    currentRound: number;
+    totalRounds: number;
+    status: GameStatus;
 }
 
 const GameArena: React.FC = () => {
@@ -27,9 +32,12 @@ const GameArena: React.FC = () => {
         aiMove: null,
         result: null,
         history: [{ game: 0, winRate: 0 }],
-        logs: ['System initialized...', 'AI Neural Network online...', 'Waiting for player input...'],
+        logs: ['System initialized...', 'AI Neural Network online...', 'Waiting for configuration...'],
         stats: { wins: 0, losses: 0, ties: 0, total: 0 },
-        activeStrategy: 'Initializing...'
+        activeStrategy: 'Standby',
+        currentRound: 0,
+        totalRounds: 10, // Default
+        status: 'SETUP'
     });
 
     const logsEndRef = useRef<HTMLDivElement>(null);
@@ -42,7 +50,25 @@ const GameArena: React.FC = () => {
         scrollToBottom();
     }, [gameState.logs]);
 
+    const startGame = (rounds: number) => {
+        ai.reset();
+        setGameState({
+            playerMove: null,
+            aiMove: null,
+            result: null,
+            history: [{ game: 0, winRate: 0 }],
+            logs: ['System initialized...', `Match configured for ${rounds} rounds.`, 'AI Neural Network online...', 'Waiting for player input...'],
+            stats: { wins: 0, losses: 0, ties: 0, total: 0 },
+            activeStrategy: 'Initializing...',
+            currentRound: 1,
+            totalRounds: rounds,
+            status: 'PLAYING'
+        });
+    };
+
     const handleMove = (move: Move) => {
+        if (gameState.status !== 'PLAYING') return;
+
         const { aiMove, logs, activeStrategy } = ai.play(move);
 
         let result: 'WIN' | 'LOSE' | 'TIE' = 'TIE';
@@ -62,17 +88,22 @@ const GameArena: React.FC = () => {
 
             const aiWinRate = (newStats.losses / newStats.total) * 100; // AI Win Rate (Player Loss Rate)
 
-            // Limit logs to last 50 items to prevent performance issues
-            const newLogs = [...prev.logs, `Player chose ${move}`, ...logs, `Result: ${result === 'WIN' ? 'Player Wins' : result === 'LOSE' ? 'AI Wins' : 'Tie'}`].slice(-50);
+            // Limit logs to last 50 items
+            const newLogs = [...prev.logs, `Round ${prev.currentRound}: Player chose ${move}`, ...logs, `Result: ${result === 'WIN' ? 'Player Wins' : result === 'LOSE' ? 'AI Wins' : 'Tie'}`].slice(-50);
+
+            const isFinished = prev.currentRound >= prev.totalRounds;
 
             return {
+                ...prev,
                 playerMove: move,
                 aiMove: aiMove,
                 result,
                 history: [...prev.history, { game: newStats.total, winRate: aiWinRate }],
                 logs: newLogs,
                 stats: newStats,
-                activeStrategy
+                activeStrategy,
+                currentRound: isFinished ? prev.currentRound : prev.currentRound + 1,
+                status: isFinished ? 'FINISHED' : 'PLAYING'
             };
         });
     };
@@ -88,8 +119,16 @@ const GameArena: React.FC = () => {
         if (move === 'S') return <div className="text-4xl">✂️</div>;
     };
 
+    const resetGame = () => {
+        setGameState(prev => ({
+            ...prev,
+            status: 'SETUP',
+            logs: ['System reset...', 'Waiting for new configuration...']
+        }));
+    };
+
     return (
-        <div className="min-h-screen h-full bg-dark-bg text-neon-green p-4 flex flex-col gap-4 overflow-auto">
+        <div className="min-h-screen h-full bg-dark-bg text-neon-green p-4 flex flex-col gap-4 overflow-auto font-mono relative">
             {/* Header / Stats */}
             <header className="flex justify-between items-center border-b border-neon-green/30 pb-4">
                 <div className="flex items-center gap-2">
@@ -99,23 +138,14 @@ const GameArena: React.FC = () => {
                     </h1>
                 </div>
                 <div className="flex gap-8 text-sm items-center">
-                    <button
-                        onClick={() => {
-                            ai.reset();
-                            setGameState({
-                                playerMove: null,
-                                aiMove: null,
-                                result: null,
-                                history: [{ game: 0, winRate: 0 }],
-                                logs: ['System reset...', 'Waiting for new patterns...'],
-                                stats: { wins: 0, losses: 0, ties: 0, total: 0 },
-                                activeStrategy: 'Reset'
-                            });
-                        }}
-                        className="px-4 py-2 border border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-dark-bg rounded uppercase font-bold text-xs transition-all"
-                    >
-                        Reset System
-                    </button>
+                    {gameState.status === 'PLAYING' && (
+                        <div className="flex flex-col items-center">
+                            <span className="text-gray-400">ROUND</span>
+                            <span className="text-xl font-bold text-white">
+                                {gameState.currentRound} / {gameState.totalRounds}
+                            </span>
+                        </div>
+                    )}
                     <div className="flex flex-col items-center">
                         <span className="text-gray-400">AI WIN RATE</span>
                         <span className="text-xl font-bold text-neon-blue">
@@ -129,9 +159,96 @@ const GameArena: React.FC = () => {
                 </div>
             </header>
 
+            {/* SETUP SCREEN */}
+            <AnimatePresence>
+                {gameState.status === 'SETUP' && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-dark-bg/95 flex items-center justify-center"
+                    >
+                        <div className="bg-dark-surface border border-neon-green p-8 rounded-lg max-w-md w-full text-center shadow-[0_0_50px_rgba(57,255,20,0.1)]">
+                            <Brain className="w-16 h-16 text-neon-pink mx-auto mb-6 animate-pulse" />
+                            <h2 className="text-3xl font-bold text-white mb-2">INITIALIZE MATCH</h2>
+                            <p className="text-gray-400 mb-8">Select the number of rounds to calibrate the AI against your neural patterns.</p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                {[10, 20, 50, 100].map(rounds => (
+                                    <button
+                                        key={rounds}
+                                        onClick={() => startGame(rounds)}
+                                        className="px-6 py-4 border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-dark-bg transition-all rounded font-bold text-lg"
+                                    >
+                                        {rounds} ROUNDS
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-4">
+                                * AI requires at least 10 rounds to build an accurate predictive model.
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* GAME OVER SCREEN */}
+            <AnimatePresence>
+                {gameState.status === 'FINISHED' && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-dark-bg/95 flex items-center justify-center"
+                    >
+                        <div className="bg-dark-surface border-2 border-neon-pink p-10 rounded-lg max-w-lg w-full text-center shadow-[0_0_100px_rgba(255,0,255,0.2)] relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-neon-pink via-purple-500 to-neon-pink animate-pulse" />
+
+                            {gameState.stats.wins > gameState.stats.losses ? (
+                                <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
+                            ) : gameState.stats.losses > gameState.stats.wins ? (
+                                <Bot className="w-20 h-20 text-neon-pink mx-auto mb-4" />
+                            ) : (
+                                <AlertTriangle className="w-20 h-20 text-gray-400 mx-auto mb-4" />
+                            )}
+
+                            <h2 className="text-4xl font-black text-white mb-2 italic">
+                                {gameState.stats.wins > gameState.stats.losses ? 'YOU WON!' : gameState.stats.losses > gameState.stats.wins ? 'AI DOMINATION' : 'STALEMATE'}
+                            </h2>
+
+                            <p className="text-xl text-neon-blue mb-8 font-bold">
+                                AI WIN RATE: {((gameState.stats.losses / gameState.stats.total) * 100).toFixed(1)}%
+                            </p>
+
+                            <div className="grid grid-cols-3 gap-4 mb-8 text-sm">
+                                <div className="bg-dark-bg p-3 rounded border border-neon-green/30">
+                                    <div className="text-gray-400">WINS</div>
+                                    <div className="text-2xl text-neon-green font-bold">{gameState.stats.wins}</div>
+                                </div>
+                                <div className="bg-dark-bg p-3 rounded border border-neon-pink/30">
+                                    <div className="text-gray-400">LOSSES</div>
+                                    <div className="text-2xl text-neon-pink font-bold">{gameState.stats.losses}</div>
+                                </div>
+                                <div className="bg-dark-bg p-3 rounded border border-gray-500/30">
+                                    <div className="text-gray-400">TIES</div>
+                                    <div className="text-2xl text-white font-bold">{gameState.stats.ties}</div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={resetGame}
+                                className="w-full px-8 py-4 bg-neon-pink text-white hover:bg-pink-600 transition-all rounded font-bold text-lg flex items-center justify-center gap-2"
+                            >
+                                <RotateCcw className="w-5 h-5" /> REBOOT SYSTEM
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[600px]">
                 {/* Left: Player Controls */}
-                <div className="flex flex-col justify-center items-center gap-8 border border-neon-green/20 bg-dark-surface/50 p-8 rounded-lg relative overflow-hidden">
+                <div className={`flex flex-col justify-center items-center gap-8 border border-neon-green/20 bg-dark-surface/50 p-8 rounded-lg relative overflow-hidden transition-opacity duration-500 ${gameState.status !== 'PLAYING' ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-green to-transparent opacity-50" />
                     <h2 className="text-xl font-bold mb-4">PLAYER_CONTROLS</h2>
 
