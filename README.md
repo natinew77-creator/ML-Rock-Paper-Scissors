@@ -7,7 +7,7 @@
 
 Unlike standard RNG-based games, this project features a sophisticated **Ensemble Learning AI** capable of analyzing player patterns in real-time, predicting moves with high accuracy, and adapting to shifting strategies within milliseconds.
 
-![MindMatch Arena Preview](https://via.placeholder.com/800x450?text=MindMatch+Arena+Preview)
+### [👉 Play Live Demo Now](https://mind-match-arena-ai.vercel.app)
 
 ## Key Features
 
